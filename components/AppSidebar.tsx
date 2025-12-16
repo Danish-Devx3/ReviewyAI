@@ -179,7 +179,7 @@ export const AppSidebar = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-colors font-medium">
                     <LogOut className="w-5 h-5 mr-3 shrink-0" />
-                    <Logout>Logout</Logout>
+                    <Logout><button>Logout</button></Logout>
                   </DropdownMenuItem>
                 </div>
               </DropdownMenuContent>
