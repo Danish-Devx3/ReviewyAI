@@ -101,11 +101,66 @@ export const getMonthlyActivity = async () => {
         monthlyData[monthKeys] = {commits:0, prs:0, reviews:0};
     }
 
-    calendar.weeks.forEach((week) => {
-        week.contributionDays.forEach((day) => {
+    calendar.weeks.forEach((week: any) => {
+        week.contributionDays.forEach((day: any) => {
             const date = new Date(day.date);
             const monthKey = monthNames[date.getMonth()];
-            monthlyData[monthKey].commits += day.contributionCount;
-            
-  } catch (error) {}
+            if(monthlyData[monthKey]){
+                monthlyData[monthKey].commits += day.contributionCount;
+            }
+        });
+    });
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    // todo: reviews real data
+
+    const generateSampleReviews = () => {
+        const reviews = [];
+        const now = new Date();
+        // Generate random review dates within the last 6 months
+        for(let i=0; i<45; i++){
+            const randomDaysAgo = Math.floor(Math.random() * 180); // 0 to 179 days ago
+            const reviewDate = new Date(now);
+            reviewDate.setDate(now.getDate() - randomDaysAgo);
+            reviews.push({
+                createdAt: reviewDate
+            });
+        }
+
+        return reviews;
+    }
+
+    const reviews = generateSampleReviews();
+
+    reviews.forEach((review) => {
+        const monthKey = monthNames[review.createdAt.getMonth()];
+        if(monthlyData[monthKey]){
+            monthlyData[monthKey].reviews += 1;
+        }
+    });
+
+    const {data: prs} = await octokit.rest.search.issuesAndPullRequests({
+        q: `author:${user.login} type:pr created:>=${sixMonthsAgo.toISOString().split('T')[0]}`,
+        per_page: 100,
+    });
+
+    prs.items.forEach((pr) => {
+        const prDate = new Date(pr.created_at);
+        const monthKey = monthNames[prDate.getMonth()];
+        if(monthlyData[monthKey]){
+            monthlyData[monthKey].prs += 1;
+        }
+    });
+
+    return Object.keys(monthlyData).map((month) => ({
+        month,
+        ...monthlyData[month],
+    }));
+    
+  } catch (error) {
+    console.error("Error fetching monthly activity:", error);
+    return [];
+  }
 };
