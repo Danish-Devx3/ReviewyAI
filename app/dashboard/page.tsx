@@ -1,5 +1,6 @@
 "use client"
 
+import ContributionActivityChart from "@/components/contributionChart"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getDashboardStats, getMonthlyActivity } from "@/module/dashboard/actions"
 import { useQuery } from "@tanstack/react-query"
@@ -70,6 +71,15 @@ const DashboardPage = () => {
                     </CardContent>
                 </Card>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Contribution Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ContributionActivityChart />
+                </CardContent>
+            </Card>
         </div>
     )
 }

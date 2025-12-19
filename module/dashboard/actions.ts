@@ -164,3 +164,44 @@ export const getMonthlyActivity = async () => {
     return [];
   }
 };
+
+export async function getContributionActivity() {
+    try {
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session?.user?.id) {
+            throw new Error("Unauthorized");
+        }
+
+        const token = await getGithubToken();
+
+        const octokit = new Octokit({ auth: token });
+
+        const { data: user } = await octokit.rest.users.getAuthenticated();
+        const calendar = await fetchUserContributions(token, user.login);
+
+        if (!calendar) {
+            return [];
+        }
+
+        const contributions = calendar.weeks.flatMap((week: any) =>
+            week.contributionDays.map((day: any) => ({
+                date: day.date,
+                count: day.contributionCount,
+                level: Math.min(4, Math.floor(day.contributionCount / 3)), // Convert to 0-4 scale
+            }))
+        );
+        
+        return {
+          contributions,
+          totalContributions: calendar.totalContributions
+        };
+      }
+      catch (error) {
+        console.error("Error fetching contribution activity:", error);
+        return [];
+      }
+}
+  
