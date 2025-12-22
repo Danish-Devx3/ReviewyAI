@@ -1,25 +1,122 @@
-"use client"
+"use client";
 
-import { UseRepositories } from "@/module/repository/actions/hooks/useRepositories"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { UseRepositories } from "@/module/repository/actions/hooks/useRepositories";
+import { ExternalLink, Search } from "lucide-react";
+import { useState } from "react";
 
 interface Repository {
-    id: string
-    name: string
-    full_name: string
-    description: string | null
-    html_url: string
-    language: string | null
-    stargazers_count: number
-    topics: string[]
-    isConnected: boolean
+  id: string;
+  name: string;
+  full_name: string;
+  description: string | null;
+  html_url: string;
+  language: string | null;
+  stargazers_count: number;
+  topics: string[];
+  isConnected: boolean;
 }
-
 
 const page = () => {
-    const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } = UseRepositories();
-  return (
-    <div>page</div>
-  )
-}
+  const [searchQuery, setSearchQuery] = useState('');
+  const [localConnectingId, setLocalConnectingId] = useState<number | null >(null)
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = UseRepositories();
 
-export default page
+  const allRepo = data?.pages.flatMap((page) => page) || [];
+
+  const filteredRepositories = allRepo.filter(
+    (repo: Repository) =>
+      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  function handleConnect(repo: Repository){
+
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Repositories</h1>
+        <p className="text-muted-foreground">
+          Manage and view all Github repositories
+        </p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+         type="text"
+          className="pl-8"
+          placeholder="Search Repos"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-4">
+        {filteredRepositories.map((repo: Repository) => (
+          <Card key={repo.id} className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">{repo.name}</CardTitle>
+                    <Badge variant={"outline"}>{repo.language}</Badge>
+                    {repo.isConnected && (
+                      <Badge variant={"secondary"}>Connected</Badge>
+                    )}
+                  </div>
+                  <CardDescription>{repo.description}</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="icon" asChild>
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                  <Button
+                   onClick={()=>handleConnect(repo)}
+                   disabled={localConnectingId === repo.id}
+                  >
+                    {localConnectingId === repo.id ? "Connecting..." : repo.isConnected ? "Connected" : "Connect"}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+
+      <div ref={observerTarget} className="py-4">
+            {isFetchingNextPage  && <RepositoryListSkeleton/>}
+            {
+                !hasNextPage || allRepo.length < 0 && (
+                    <p>No More Repositories</p>
+                )
+            }
+      </div>
+    </div>
+  );
+};
+
+export default page;
