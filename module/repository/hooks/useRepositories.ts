@@ -1,7 +1,7 @@
 "use client"
 
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { fetchRepositories } from ".."
+import { fetchRepositories } from "../actions"
 
 export const UseRepositories = ()=>{
     return useInfiniteQuery({

@@ -9,9 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { UseRepositories } from "@/module/repository/actions/hooks/useRepositories";
+import { UseRepositories } from "@/module/repository/hooks/useRepositories";
+import { RepositoryListSkeleton } from "@/module/repository/components/repositorySkeleton";
 import { ExternalLink, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Repository {
   id: string;
@@ -28,6 +29,8 @@ interface Repository {
 const page = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [localConnectingId, setLocalConnectingId] = useState<number | null >(null)
+  const observerTarget = useRef<HTMLDivElement>(null);
+
   const {
     data,
     isLoading,
@@ -47,6 +50,52 @@ const page = () => {
 
   function handleConnect(repo: Repository){
 
+  }
+
+  useEffect(()=>{
+    const observer = new IntersectionObserver((entries)=>{
+      if(entries[0].isIntersecting && hasNextPage && !isFetchingNextPage){
+        fetchNextPage()
+      }
+    },{ threshold: 1.0 })
+
+    if(observerTarget.current){
+      observer.observe(observerTarget.current)
+    }
+
+    return ()=>{
+      if(observerTarget.current){
+        observer.unobserve(observerTarget.current)
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage]);
+
+   if(isLoading){
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Repositories</h1>
+          <p className="text-muted-foreground">
+            Manage and view all Github repositories
+          </p>
+        </div>
+        <RepositoryListSkeleton />
+      </div>
+    )
+  }
+
+  if(isError){
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Repositories</h1>
+          <p className="text-muted-foreground">
+            Manage and view all Github repositories
+          </p>
+        </div>
+        <p className="text-red-500">Error loading repositories. Please try again later.</p>
+      </div>
+    )
   }
 
   return (
@@ -110,8 +159,8 @@ const page = () => {
       <div ref={observerTarget} className="py-4">
             {isFetchingNextPage  && <RepositoryListSkeleton/>}
             {
-                !hasNextPage || allRepo.length < 0 && (
-                    <p>No More Repositories</p>
+                !hasNextPage && allRepo.length < 0 && (
+                    <p className="text-center text-muted-foreground">No More Repositories</p>
                 )
             }
       </div>
