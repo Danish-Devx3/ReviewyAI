@@ -1,7 +1,7 @@
 "use server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getRepositories } from "@/module/github/lib/github";
+import { createWebhook, getRepositories } from "@/module/github/lib/github";
 import { headers } from "next/headers";
 
 export const fetchRepositories = async (page, perPage) => {
@@ -27,3 +27,22 @@ export const fetchRepositories = async (page, perPage) => {
     isConnected: connectedRepoIds.has(BigInt(repo.id)),
   }));
 };
+
+
+export const connectRepo = async (owner: string, repo: string, githubId: string)=>{
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) {
+    throw new Error("Unauthorized")
+  }
+
+  //todo check if user can connect more repo
+
+  const webhook = await createWebhook(owner, repo)
+
+  if(webhook){
+
+  }
+}
