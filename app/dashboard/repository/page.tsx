@@ -13,6 +13,7 @@ import { UseRepositories } from "@/module/repository/hooks/useRepositories";
 import { RepositoryListSkeleton } from "@/module/repository/components/repositorySkeleton";
 import { ExternalLink, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useConnectRepo } from "@/module/repository/hooks/useConnectRepo";
 
 interface Repository {
   id: string;
@@ -28,7 +29,7 @@ interface Repository {
 
 const page = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [localConnectingId, setLocalConnectingId] = useState<number | null >(null)
+  const [localConnectingId, setLocalConnectingId] = useState<string | null >(null)
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
@@ -40,6 +41,8 @@ const page = () => {
     isFetchingNextPage,
   } = UseRepositories();
 
+  const {mutate: connectRepo} = useConnectRepo()
+
   const allRepo = data?.pages.flatMap((page) => page) || [];
 
   const filteredRepositories = allRepo.filter(
@@ -49,6 +52,16 @@ const page = () => {
   );
 
   function handleConnect(repo: Repository){
+    setLocalConnectingId(repo.id)
+    connectRepo({
+      owner: repo.full_name.split("/")[0],
+      repo: repo.name,
+      githubId: repo.id
+    },
+    {
+      onSettled: ()=> setLocalConnectingId(null)
+    }
+  )
 
   }
 

@@ -43,6 +43,20 @@ export const connectRepo = async (owner: string, repo: string, githubId: string)
   const webhook = await createWebhook(owner, repo)
 
   if(webhook){
-
+    await prisma.repository.create({
+      data: {
+        githubId: BigInt(githubId),
+        name: repo,
+        owner,
+        fullName: `${owner}/${repo}`,
+        url: `https://github.com/${owner}/${repo}`,
+        userId: session.user.id,
+      },
+    })
   }
+
+  // todo increment user's connected repo count for plan limits
+  // triger repo indexing for rag (fire forget)
+
+  return webhook
 }

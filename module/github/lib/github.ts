@@ -83,9 +83,10 @@ export const createWebhook = async (owner: string, repo: string) => {
 
   const webhookUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/github`;
 
-  const { data: hooks } = await octokit.rest.repos.createWebhook({
+  const { data: hooks } = await octokit.rest.repos.listWebhooks({
     owner,
     repo,
+    name: "web",hook_id: 1
   });
   
   const existingHook = hooks.find((hook) => hook.config.url === webhookUrl);
@@ -93,7 +94,6 @@ export const createWebhook = async (owner: string, repo: string) => {
   if (existingHook) {
     return existingHook;
   }
-
   const { data } = await octokit.rest.repos.createWebhook({
     owner,
     repo,
