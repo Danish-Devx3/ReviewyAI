@@ -1,5 +1,7 @@
 "use client"
 
+import { ProfileForm } from "@/module/settings/components/profileForm";
+
 const SettingPage = () => {
     return <div>
         <div className="space-y-6">
@@ -8,6 +10,7 @@ const SettingPage = () => {
             </h1>
             <p className="text-muted-foreground">Manage your account settings and connected repository</p>
         </div>
+        <ProfileForm/>
     </div>
 }
 
