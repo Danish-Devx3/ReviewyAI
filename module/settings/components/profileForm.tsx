@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react";
 import { useUpdateUserProfile, useUserProfile } from "../hooks/useUserProfile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export const ProfileForm = () => {
     const queryClient = useQueryClient();
@@ -52,7 +54,7 @@ export const ProfileForm = () => {
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
-                            <input
+                            <Input
                                 type="text"
                                 name="name"
                                 id="name"
@@ -64,7 +66,7 @@ export const ProfileForm = () => {
                         </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
-                            <input
+                            <Input
                                 type="email"
                                 name="email"
                                 id="email"
@@ -74,6 +76,15 @@ export const ProfileForm = () => {
                                 required
                             />
                         </div>
+                    </div>
+                    <div className="mt-6">
+                        <Button
+                            type="submit"
+                            disabled={isUpdating}
+                            className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isUpdating ? "Updating..." : "Update Profile"}
+                        </Button>
                     </div>
                 </form>
             </CardContent>
