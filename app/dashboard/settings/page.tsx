@@ -1,6 +1,7 @@
 "use client"
 
 import { ProfileForm } from "@/module/settings/components/profileForm";
+import RepoList from "@/module/settings/components/repoList";
 
 const SettingPage = () => {
     return <div className="space-y-6">
@@ -11,6 +12,7 @@ const SettingPage = () => {
             <p className="text-muted-foreground">Manage your account settings and connected repository</p>
         </div>
         <ProfileForm/>
+        <RepoList/>
     </div>
 }
 

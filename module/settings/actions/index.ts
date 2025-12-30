@@ -72,7 +72,7 @@ export async function updateUserProfile(data: { name: string; email: string }) {
   }
 }
 
-export async function getConnectedRepo() {
+export async function getConnectedRepos() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -149,7 +149,7 @@ export async function disconnectRepository(repoId: string) {
   }
 }
 
-export async function disconnectAllRepo() {
+export async function disconnectAllRepos() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
