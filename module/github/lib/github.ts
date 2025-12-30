@@ -2,6 +2,7 @@ import { Octokit } from "octokit";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export const getGithubToken = async () => {
   const session = await auth.api.getSession({
@@ -86,9 +87,10 @@ export const createWebhook = async (owner: string, repo: string) => {
   const { data: hooks } = await octokit.rest.repos.listWebhooks({
     owner,
     repo,
-    name: "web",hook_id: 1
+    name: "web",
+    hook_id: 1,
   });
-  
+
   const existingHook = hooks.find((hook) => hook.config.url === webhookUrl);
 
   if (existingHook) {
@@ -110,29 +112,138 @@ export const createWebhook = async (owner: string, repo: string) => {
 export const deleteWebhook = async (owner: string, repo: string) => {
   try {
     const token = await getGithubToken();
-  const octokit = new Octokit({ auth: token });
+    const octokit = new Octokit({ auth: token });
 
-  const webhookUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/github`;
+    const webhookUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/webhooks/github`;
 
-  const { data: hooks } = await octokit.rest.repos.listWebhooks({
-    owner,
-    repo,
-  });
+    const { data: hooks } = await octokit.rest.repos.listWebhooks({
+      owner,
+      repo,
+    });
 
-  const hookToDelete = hooks.find((hook) => hook.config.url === webhookUrl);
+    const hookToDelete = hooks.find((hook) => hook.config.url === webhookUrl);
 
-  if (!hookToDelete) {
-    return false;
-  }
+    if (!hookToDelete) {
+      return false;
+    }
 
-  await octokit.rest.repos.deleteWebhook({
-    owner,
-    repo,
-    hook_id: hookToDelete.id,
-  });
-  return true;
+    await octokit.rest.repos.deleteWebhook({
+      owner,
+      repo,
+      hook_id: hookToDelete.id,
+    });
+    return true;
   } catch (error) {
     console.log("[DELETE_WEBHOOK_ERROR]", error);
     return false;
   }
 };
+
+export const getConnectedRepos = async () => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const repos = await prisma.repository.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        fullName: true,
+        url: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return repos;
+  } catch (error) {
+    console.error("Error fetching connected repositories:", error);
+    return [];
+  }
+};
+
+export const disconnectRepo = async (repoId: string) => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const repo = await prisma.repository.findUnique({
+      where: {
+        id: repoId,
+        userId: session.user.id,
+      },
+    });
+
+    if (!repo) {
+      throw new Error("Repository not found");
+    }
+
+    await deleteWebhook(repo.owner, repo.name);
+
+    await prisma.repository.delete({
+      where: {
+        id: repoId,
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath("/dashboard/settings", "page");
+    revalidatePath("/dashboard/repository", "page");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error disconnecting repository:", error);
+    return { success: false, error: (error as Error).message };
+  }
+};
+
+export const disconnectAllRepos = async () => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const repos = await prisma.repository.findMany({
+      where: {
+        userId: session.user.id,
+      },
+    });
+
+    await Promise.all(
+      repos.map((repo) => deleteWebhook(repo.owner, repo.name))
+    );
+
+    await prisma.repository.deleteMany({
+      where: {
+        userId: session.user.id,
+      },
+    });
+
+    revalidatePath("/dashboard/settings", "page");
+    revalidatePath("/dashboard/repository", "page");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error disconnecting all repositories:", error);
+    return { success: false, error: (error as Error).message };
+  }
+}
