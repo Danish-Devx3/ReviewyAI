@@ -1,4 +1,5 @@
 "use server";
+import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createWebhook, getRepositories } from "@/module/github/lib/github";
@@ -57,6 +58,18 @@ export const connectRepo = async (owner: string, repo: string, githubId: string)
 
   // todo increment user's connected repo count for plan limits
   // triger repo indexing for rag (fire forget)
+  try {
+    await inngest.send({
+      name: "repo.connected",
+      data: {
+        owner,
+        repo,
+        userId: session.user.id
+      }
+    })
+  } catch (error) {
+    console.error("Error indexing repository:", error)
+  }
 
   return webhook
 }
