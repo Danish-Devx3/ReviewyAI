@@ -152,6 +152,7 @@ export const getRepoFileContents = async (
     repo,
     path,
   });
+  console.log("repo files: ", data.toString())
 
   if (!Array.isArray(data)) {
     if (data.type === "file") {
@@ -197,4 +198,6 @@ export const getRepoFileContents = async (
       files = files.concat(nestedFiles);
     }
   }
+
+  return files;
 };
