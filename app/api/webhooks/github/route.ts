@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     if (event === "pull_request") {
       const { action, number } = body;
       const repo = body.repository.full_name;
+      console.log("[GitHub Webhook]", { event, repo, action, number });
 
       const [owner, repoName] = repo.split("/");
 

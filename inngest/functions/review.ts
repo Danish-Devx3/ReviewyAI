@@ -13,8 +13,8 @@ export const generateReview = inngest.createFunction(
     { event: "pr.review.requested" },
 
     async ({ event, step }) => {
-        const { owner, repo, prNumber, userId } = event.data;
-
+        const { owner, repoName, prNumber, userId } = event.data;
+        console.log("[Reponame]", repoName)
         const { diff, title, description, token } = await step.run("fetch-pr-data", async () => {
             const account = await prisma.account.findFirst({
                 where: {
@@ -25,7 +25,7 @@ export const generateReview = inngest.createFunction(
 
             if (!account?.accessToken) throw new Error("No access token found")
 
-            const data = await getPRDiff(account.accessToken, owner, repo, prNumber);
+            const data = await getPRDiff(account.accessToken, owner, repoName, prNumber);
 
             return { ...data, token: account.accessToken }
         })
@@ -33,7 +33,7 @@ export const generateReview = inngest.createFunction(
         const context = await step.run("retrive-context", async () => {
             const query = `${title}\n${description}`;
 
-            return await retriveContent(query, `${owner}/${repo}`);
+            return await retriveContent(query, `${owner}/${repoName}`);
         })
 
         const review = await step.run("generate-ai-review", async () => {
@@ -70,7 +70,7 @@ Format your response in markdown.`;
         })
 
         await step.run("post-comment", async ()=> {
-            await postReviewComment(token, owner, repo, prNumber, review);
+            await postReviewComment(token, owner, repoName, prNumber, review);
         })
 
         await step.run("update-pr-status", async ()=> {
@@ -86,9 +86,9 @@ Format your response in markdown.`;
                     data: {
                         repositoryId: repository.id,
                         prNumber,
-                        prTitle: title,
+                        prTitle: title || "",
                         prBody: description,
-                        prUrl: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
+                        prUrl: `https://github.com/${owner}/${repoName}/pull/${prNumber}`,
                         review: review,
                         status: "completed"
                     }

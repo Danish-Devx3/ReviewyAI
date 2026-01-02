@@ -4,13 +4,13 @@ import { inngest } from "@/inngest/client";
 import prisma from "@/lib/prisma"
 import { getPRDiff } from "@/module/github/lib/github";
 
-export async function reviewPR(owner: string, name: string, prNumber: number) {
+export async function reviewPR(owner: string, repoName: string, prNumber: number) {
     try {
         
     const repo = await prisma.repository.findFirst({
         where: {
             owner,
-            name
+            name: repoName
         },
         include: {
             user: {
@@ -26,7 +26,7 @@ export async function reviewPR(owner: string, name: string, prNumber: number) {
     });
 
     if (!repo?.user.accounts[0].accessToken){
-        throw new Error(`Repository not found: ${owner}/${name}, Please reconnect the repository.`)
+        throw new Error(`Repository not found: ${owner}/${repoName}, Please reconnect the repository.`)
     }
 
     const token = repo.user.accounts[0].accessToken;
@@ -35,7 +35,7 @@ export async function reviewPR(owner: string, name: string, prNumber: number) {
         name: "pr.review.requested",
         data: {
             owner,
-            repo,
+            repoName,
             prNumber,
             userId: repo.userId
         }
@@ -51,7 +51,7 @@ export async function reviewPR(owner: string, name: string, prNumber: number) {
             const repo = await prisma.repository.findFirst({
                 where: {
                     owner,
-                    name
+                    name: repoName
                 }
             });
 
@@ -62,7 +62,7 @@ export async function reviewPR(owner: string, name: string, prNumber: number) {
                         prNumber,
                         prTitle: "Failed to fetch PR",
                         prBody: "Failed to fetch PR",
-                        prUrl: `https://github.com/${owner}/${name}/pull/${prNumber}`,
+                        prUrl: `https://github.com/${owner}/${repoName}/pull/${prNumber}`,
                         review: `Error: ${error instanceof Error ? error.message : error}`,
                         status: "failed"
                     }

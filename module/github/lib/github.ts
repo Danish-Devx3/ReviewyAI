@@ -205,6 +205,14 @@ export const getRepoFileContents = async (
 export async function getPRDiff( token: string, owner: string, repo: string, pull_number: number ) {
   const octokit = new Octokit({ auth: token });
 
+  console.log("[GET_PR_DIFF]", {token, owner, repo, pull_number });
+  
+  const data = await octokit.rest.pulls.get({
+    owner,
+    repo,
+    pull_number,
+  });
+
   const {data: diff} = await octokit.rest.pulls.get({
     owner,
     repo,
