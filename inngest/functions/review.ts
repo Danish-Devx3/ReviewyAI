@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { inngest } from "../client";
-import { getPRDiff, postReviewComment } from "@/module/github/l+ib/github";
+import { getPRDiff, postReviewComment } from "@/module/github/lib/github";
 import { retriveContent } from "@/module/ai/lib/rag";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
