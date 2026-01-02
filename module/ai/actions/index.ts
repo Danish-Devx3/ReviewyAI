@@ -34,7 +34,7 @@ export async function reviewPR(owner: string, name: string, prNumber: number) {
     const { diff, title, description } = await getPRDiff(token, owner, name, prNumber);
     
     await inngest.send({
-        name: "pr-reviewed-requested",
+        name: "pr.review.requested",
         data: {
             owner,
             repo,

@@ -220,3 +220,14 @@ export async function getPRDiff( token: string, owner: string, repo: string, pul
     description: diff.body || "",
   }
 }
+
+export const postReviewComment = async (token: string, owner: string, repo: string, pull_number: number, review: string) => {
+  const octokit = new Octokit({ auth: token });
+
+  await octokit.rest.issues.createComment({
+    owner,
+    repo,
+    issue_number: pull_number,
+    body: `## AI Code Review \n\n${review}\n\n---\n*Powered by Codepur*`,
+  });
+};
