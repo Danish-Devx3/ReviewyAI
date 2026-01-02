@@ -201,3 +201,22 @@ export const getRepoFileContents = async (
 
   return files;
 };
+
+export async function getPRDiff( token: string, owner: string, repo: string, pull_number: number ) {
+  const octokit = new Octokit({ auth: token });
+
+  const {data: diff} = await octokit.rest.pulls.get({
+    owner,
+    repo,
+    pull_number,
+    mediaType: {
+      format: "diff",
+    },
+  });
+
+  return {
+    diff: diff as unknown as string,
+    title: diff.title,
+    description: diff.body || "",
+  }
+}
