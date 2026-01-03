@@ -55,7 +55,7 @@ model Review {
   prBody       String
   prUrl        String
   review       String
-  status       String     @default("competed")
+  status       String     @default("completed")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
