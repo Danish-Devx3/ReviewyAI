@@ -1,6 +1,5 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react";
 import { useUpdateUserProfile, useUserProfile } from "../hooks/useUserProfile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,39 +7,44 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export const ProfileForm = () => {
-    const queryClient = useQueryClient();
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
 
     const { data: userProfile, isLoading } = useUserProfile();
-    const {mutate: updateUserProfile, isLoading: isUpdating} = useUpdateUserProfile();
+    const { mutate: updateUserProfile, isPending: isUpdating } = useUpdateUserProfile();
 
+    // Initialize form values when userProfile is loaded
+    const initialName = userProfile?.name || "";
+    const initialEmail = userProfile?.email || "";
+
+    // Only set initial values once when userProfile becomes available
     useEffect(() => {
-        if (userProfile) {
-            setName(userProfile.name || "")
-            setEmail(userProfile.email || "")
+        if (userProfile && !name && !email) {
+            setName(initialName);
+            setEmail(initialEmail);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userProfile]);
 
-    
-    const handleSubmit = async (e) => {
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         await updateUserProfile({ name, email });
     }
 
-    if(isLoading){
+    if (isLoading) {
         return <Card>
-        <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>Update your profile information</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="animate-pulse space-y-4">
-                <div className="h-10 bg-muted rounded"></div>
-                <div className="h-10 bg-muted rounded"></div>
-            </div>
-        </CardContent>
-    </Card>
+            <CardHeader>
+                <CardTitle>Profile Settings</CardTitle>
+                <CardDescription>Update your profile information</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="animate-pulse space-y-4">
+                    <div className="h-10 bg-muted rounded"></div>
+                    <div className="h-10 bg-muted rounded"></div>
+                </div>
+            </CardContent>
+        </Card>
     }
 
     return (

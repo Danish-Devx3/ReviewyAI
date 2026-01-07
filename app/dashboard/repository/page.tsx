@@ -27,9 +27,9 @@ interface Repository {
   isConnected: boolean;
 }
 
-const page = () => {
+const Page = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [localConnectingId, setLocalConnectingId] = useState<string | null >(null)
+  const [localConnectingId, setLocalConnectingId] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const {
@@ -41,7 +41,7 @@ const page = () => {
     isFetchingNextPage,
   } = UseRepositories();
 
-  const {mutate: connectRepo} = useConnectRepo()
+  const { mutate: connectRepo } = useConnectRepo()
 
   const allRepo = data?.pages.flatMap((page) => page) || [];
 
@@ -51,39 +51,40 @@ const page = () => {
       repo.full_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  function handleConnect(repo: Repository){
+  function handleConnect(repo: Repository) {
     setLocalConnectingId(repo.id)
     connectRepo({
       owner: repo.full_name.split("/")[0],
       repo: repo.name,
       githubId: repo.id
     },
-    {
-      onSettled: ()=> setLocalConnectingId(null)
-    }
-  )
+      {
+        onSettled: () => setLocalConnectingId(null)
+      }
+    )
 
   }
 
-  useEffect(()=>{
-    const observer = new IntersectionObserver((entries)=>{
-      if(entries[0].isIntersecting && hasNextPage && !isFetchingNextPage){
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
         fetchNextPage()
       }
-    },{ threshold: 1.0 })
+    }, { threshold: 1.0 })
 
-    if(observerTarget.current){
-      observer.observe(observerTarget.current)
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget)
     }
 
-    return ()=>{
-      if(observerTarget.current){
-        observer.unobserve(observerTarget.current)
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
       }
     }
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-   if(isLoading){
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <div>
@@ -97,7 +98,7 @@ const page = () => {
     )
   }
 
-  if(isError){
+  if (isError) {
     return (
       <div className="space-y-4">
         <div>
@@ -123,7 +124,7 @@ const page = () => {
       <div className="relative">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-         type="text"
+          type="text"
           className="pl-8"
           placeholder="Search Repos"
           value={searchQuery}
@@ -157,8 +158,8 @@ const page = () => {
                     </a>
                   </Button>
                   <Button
-                   onClick={()=>handleConnect(repo)}
-                   disabled={localConnectingId === repo.id}
+                    onClick={() => handleConnect(repo)}
+                    disabled={localConnectingId === repo.id}
                   >
                     {localConnectingId === repo.id ? "Connecting..." : repo.isConnected ? "Connected" : "Connect"}
                   </Button>
@@ -170,15 +171,15 @@ const page = () => {
       </div>
 
       <div ref={observerTarget} className="py-4">
-            {isFetchingNextPage  && <RepositoryListSkeleton/>}
-            {
-                !hasNextPage && allRepo.length < 0 && (
-                    <p className="text-center text-muted-foreground">No More Repositories</p>
-                )
-            }
+        {isFetchingNextPage && <RepositoryListSkeleton />}
+        {
+          !hasNextPage && allRepo.length < 0 && (
+            <p className="text-center text-muted-foreground">No More Repositories</p>
+          )
+        }
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

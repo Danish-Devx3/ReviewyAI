@@ -15,7 +15,6 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +30,14 @@ export const AppSidebar = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
 
+  // Standard pattern to prevent hydration mismatch with client-side theme
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
+
+  // Prevent hydration mismatch by not rendering theme-dependent content until mounted
+  if (!mounted) return null;
 
   const navigationItems = [
     {
@@ -107,11 +111,10 @@ export const AppSidebar = () => {
               <SidebarMenuButton
                 asChild
                 tooltip={item.title}
-                className={`h-11 px-4 rounded-lg transition-all duration-200 ${
-                  IsActive(item.href)
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                    : "hover:bg-sidebar-accent/60 text-sidebar-foreground"
-                }`}
+                className={`h-11 px-4 rounded-lg transition-all duration-200 ${IsActive(item.href)
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                  : "hover:bg-sidebar-accent/60 text-sidebar-foreground"
+                  }`}
               >
                 <Link className="flex items-center gap-3" href={item.href}>
                   <span className="w-5 h-5 shrink-0">{item.icon}</span>
@@ -161,8 +164,8 @@ export const AppSidebar = () => {
                 <div className="px-2 py-3">
                   <DropdownMenuItem asChild>
                     <button
-                     className="w-full px-3 py-3 flex items-center gap-3 cursor-pointer rounded-md hover:bg-sidebar-accent/50 transition-colors text-sm font-medium"
-                     onClick={()=>setTheme(theme === "dark" ? "light" : "dark")}
+                      className="w-full px-3 py-3 flex items-center gap-3 cursor-pointer rounded-md hover:bg-sidebar-accent/50 transition-colors text-sm font-medium"
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     >
                       {theme === "dark" ? (
                         <>

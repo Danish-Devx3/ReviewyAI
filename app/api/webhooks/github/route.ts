@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ message: "Event Processes" }, { status: 200 });
-  } catch (error) {
+  } catch {
     console.error("Error in processing webhook");
     return NextResponse.json(
       { error: "Internal Server Error" },

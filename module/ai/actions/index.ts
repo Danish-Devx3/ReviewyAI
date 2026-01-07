@@ -2,7 +2,6 @@
 
 import { inngest } from "@/inngest/client";
 import prisma from "@/lib/prisma"
-import { getPRDiff } from "@/module/github/lib/github";
 import { canGenerateReview, incrementReviewCount } from "@/module/payments/lib/subscription";
 
 export async function reviewPR(owner: string, repoName: string, prNumber: number) {

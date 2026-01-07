@@ -3,10 +3,10 @@ import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createWebhook, getRepositories } from "@/module/github/lib/github";
-import { canAddRepository, incrementRepoCount, incrementRepoCount } from "@/module/payments/lib/subscription";
+import { canAddRepository, incrementRepoCount } from "@/module/payments/lib/subscription";
 import { headers } from "next/headers";
 
-export const fetchRepositories = async (page, perPage) => {
+export const fetchRepositories = async (page: number, perPage: number) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -24,6 +24,7 @@ export const fetchRepositories = async (page, perPage) => {
 
   const connectedRepoIds = new Set(dbRepos.map((repo) => repo.githubId));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return githubRepos.map((repo: any) => ({
     ...repo,
     isConnected: connectedRepoIds.has(BigInt(repo.id)),

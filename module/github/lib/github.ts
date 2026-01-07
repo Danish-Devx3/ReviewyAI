@@ -2,7 +2,6 @@ import { Octokit } from "octokit";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
 
 export const getGithubToken = async () => {
   const session = await auth.api.getSession({
@@ -52,6 +51,7 @@ export async function fetchUserContributions(token: string, username: string) {
     `;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await octokit.graphql(query, { username });
     return response.user.contributionsCollection.contributionCalendar;
   } catch (error) {
@@ -144,7 +144,7 @@ export const getRepoFileContents = async (
   owner: string,
   repo: string,
   path: string = ""
-): Promise<any> => {
+): Promise<{ path: string; content: string }[]> => {
   const octokit = new Octokit({ auth: token });
 
   const { data } = await octokit.rest.repos.getContent({
@@ -202,18 +202,12 @@ export const getRepoFileContents = async (
   return files;
 };
 
-export async function getPRDiff( token: string, owner: string, repo: string, pull_number: number ) {
+export async function getPRDiff(token: string, owner: string, repo: string, pull_number: number) {
   const octokit = new Octokit({ auth: token });
 
-  console.log("[GET_PR_DIFF]", {token, owner, repo, pull_number });
-  
-  const data = await octokit.rest.pulls.get({
-    owner,
-    repo,
-    pull_number,
-  });
+  console.log("[GET_PR_DIFF]", { token, owner, repo, pull_number });
 
-  const {data: diff} = await octokit.rest.pulls.get({
+  const { data: diff } = await octokit.rest.pulls.get({
     owner,
     repo,
     pull_number,

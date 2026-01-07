@@ -1,6 +1,6 @@
 import { embed } from "ai";
 import { google } from "@ai-sdk/google";
-import { pinecone, pineconeIndex } from "@/lib/pinecone";
+import { pineconeIndex } from "@/lib/pinecone";
 
 export async function generateEmbeddings(text: string) {
   const { embedding } = await embed({
@@ -48,20 +48,20 @@ export async function indexCodebase(
   console.log("Indexing completed!");
 }
 
-export async function retriveContent(query: string, repoId: string, topk: number=3){
-    const queryEmbedding = await generateEmbeddings(query);
-    
-    const context = await pineconeIndex.query({
-        vector: queryEmbedding,
-        filter: {
-            repoId: {
-                $eq: repoId
-            }
-        },
-        topK: topk,
-        includeMetadata: true
-    });
+export async function retriveContent(query: string, repoId: string, topk: number = 3) {
+  const queryEmbedding = await generateEmbeddings(query);
 
-    return context.matches.map(match => match.metadata?.content as string).filter(Boolean);
+  const context = await pineconeIndex.query({
+    vector: queryEmbedding,
+    filter: {
+      repoId: {
+        $eq: repoId
+      }
+    },
+    topK: topk,
+    includeMetadata: true
+  });
+
+  return context.matches.map(match => match.metadata?.content as string).filter(Boolean);
 
 }
