@@ -3,48 +3,55 @@
 import { inngest } from "@/inngest/client";
 import prisma from "@/lib/prisma"
 import { getPRDiff } from "@/module/github/lib/github";
+import { canGenerateReview, incrementReviewCount } from "@/module/payments/lib/subscription";
 
 export async function reviewPR(owner: string, repoName: string, prNumber: number) {
     try {
-        
-    const repo = await prisma.repository.findFirst({
-        where: {
-            owner,
-            name: repoName
-        },
-        include: {
-            user: {
-                include: {
-                    accounts: {
-                        where: {
-                            providerId: "github"
+
+        const repo = await prisma.repository.findFirst({
+            where: {
+                owner,
+                name: repoName
+            },
+            include: {
+                user: {
+                    include: {
+                        accounts: {
+                            where: {
+                                providerId: "github"
+                            }
                         }
                     }
                 }
             }
+        });
+
+        if (!repo?.user.accounts[0].accessToken) {
+            throw new Error(`Repository not found: ${owner}/${repoName}, Please reconnect the repository.`)
         }
-    });
 
-    if (!repo?.user.accounts[0].accessToken){
-        throw new Error(`Repository not found: ${owner}/${repoName}, Please reconnect the repository.`)
-    }
+        const canReviewPR = await canGenerateReview(repo.userId, repo.id);
 
-    const token = repo.user.accounts[0].accessToken;
-
-    await inngest.send({
-        name: "pr.review.requested",
-        data: {
-            owner,
-            repoName,
-            prNumber,
-            userId: repo.userId
+        if (!canReviewPR) {
+            throw new Error("You have reached the limit of reviews for your plan. Please upgrade your plan to add more reviews.")
         }
-    });
 
-    return {
-        success: true,
-        message: "PR review Queued"
-    }
+        await inngest.send({
+            name: "pr.review.requested",
+            data: {
+                owner,
+                repoName,
+                prNumber,
+                userId: repo.userId
+            }
+        });
+
+        await incrementReviewCount(repo.user.id, repo.id)
+
+        return {
+            success: true,
+            message: "PR review Queued"
+        }
 
     } catch (error) {
         try {
@@ -55,7 +62,7 @@ export async function reviewPR(owner: string, repoName: string, prNumber: number
                 }
             });
 
-            if(repo){
+            if (repo) {
                 await prisma.review.create({
                     data: {
                         repositoryId: repo.id,

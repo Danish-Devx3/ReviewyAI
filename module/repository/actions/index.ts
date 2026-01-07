@@ -3,6 +3,7 @@ import { inngest } from "@/inngest/client";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { createWebhook, getRepositories } from "@/module/github/lib/github";
+import { canAddRepository, incrementRepoCount, incrementRepoCount } from "@/module/payments/lib/subscription";
 import { headers } from "next/headers";
 
 export const fetchRepositories = async (page, perPage) => {
@@ -30,7 +31,7 @@ export const fetchRepositories = async (page, perPage) => {
 };
 
 
-export const connectRepo = async (owner: string, repo: string, githubId: string)=>{
+export const connectRepo = async (owner: string, repo: string, githubId: string) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
@@ -39,11 +40,15 @@ export const connectRepo = async (owner: string, repo: string, githubId: string)
     throw new Error("Unauthorized")
   }
 
-  //todo check if user can connect more repo
+  const canAddRepo = await canAddRepository(session.user.id);
+
+  if (!canAddRepo) {
+    throw new Error("You have reached the limit of repositories for your plan. Please upgrade your plan to add more repositories.")
+  }
 
   const webhook = await createWebhook(owner, repo)
 
-  if(webhook){
+  if (webhook) {
     await prisma.repository.create({
       data: {
         githubId: BigInt(githubId),
@@ -54,21 +59,20 @@ export const connectRepo = async (owner: string, repo: string, githubId: string)
         userId: session.user.id,
       },
     })
-  }
-
-  // todo increment user's connected repo count for plan limits
-  // triger repo indexing for rag (fire forget)
-  try {
-    await inngest.send({
-      name: "repo.connected",
-      data: {
-        owner,
-        repo,
-        userId: session.user.id
-      }
-    })
-  } catch (error) {
-    console.error("Error indexing repository:", error)
+    await incrementRepoCount(session.user.id)
+    // triger repo indexing for rag (fire forget)
+    try {
+      await inngest.send({
+        name: "repo.connected",
+        data: {
+          owner,
+          repo,
+          userId: session.user.id
+        }
+      })
+    } catch (error) {
+      console.error("Error indexing repository:", error)
+    }
   }
 
   return webhook
