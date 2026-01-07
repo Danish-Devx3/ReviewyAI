@@ -49,7 +49,7 @@ function Page() {
                   <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-lg">
-                        {review.prTitle}
+                        {review.prTitle || "No title"}
                       </CardTitle>
                       {review.status === "completed" && (
                         <Badge variant={"default"} className="gap-1">
@@ -66,7 +66,7 @@ function Page() {
                     </div>
 
                     <CardDescription>
-                      {review.repository.fullName} . PR #{review.prNumber}
+                      {review.repository.fullName} ★ PR #{review.prNumber}
                     </CardDescription>
                   </div>
                   <Button variant={"ghost"} size={"icon"} asChild>
