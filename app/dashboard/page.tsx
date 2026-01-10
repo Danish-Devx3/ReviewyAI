@@ -44,7 +44,7 @@ const DashboardPage = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Overview of your coading activity and AI reviews
+          Your autonomous AI engineering command center.
         </p>
       </div>
 

@@ -71,7 +71,7 @@ const LoginCard = () => {
 
       <CardFooter className="flex flex-col space-y-4 pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground text-center">
-          New to CodeRabbit?{' '}
+          New to ReviewyAI?{' '}
           <Link
             href="/signup"
             className="text-destructive hover:underline font-semibold transition-colors"
@@ -89,7 +89,7 @@ const LoginCard = () => {
           <Link href="/privacy" className="hover:text-foreground transition-colors underline">
             Privacy Policy
           </Link>
-          {' '}applicable to CodeRabbit
+          {' '}applicable to ReviewyAI
         </p>
       </CardFooter>
     </Card>

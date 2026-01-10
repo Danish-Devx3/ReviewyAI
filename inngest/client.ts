@@ -1,7 +1,7 @@
-import {Inngest} from "inngest";
+import { Inngest } from "inngest";
 
 export const inngest = new Inngest({
-    id: "coderabbitclone",
-    name: "Coder Rabbit Clone",
+    id: "reviewyai",
+    name: "ReviewyAI",
 
 })
