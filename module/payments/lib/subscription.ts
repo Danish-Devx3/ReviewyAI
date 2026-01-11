@@ -139,7 +139,7 @@ export const incrementReviewCount = async (userId: string, repositoryId: string)
     })
 }
 
-export const getReainingLimits = async (userId: string) => {
+export const getRemainingLimits = async (userId: string) => {
     const tier = await getUserTier(userId);
     const usage = await getUserUsage(userId);
     const reviewCount = usage.reviewCount as Record<string, number>;
@@ -175,14 +175,15 @@ export const getReainingLimits = async (userId: string) => {
     return limits;
 }
 
-export const updateUserTier = async (userId: string, tier: SubscriptionTier, status: SubscriptionStatus) => {
+export const updateUserTier = async (userId: string, tier: SubscriptionTier, status: SubscriptionStatus, subscriptionId?: string) => {
     await prisma.user.update({
         where: {
             id: userId
         },
         data: {
             subscriptionTier: tier,
-            subscriptionStatus: status
+            subscriptionStatus: status,
+            polarSubscriptionId: subscriptionId || null
         }
     })
 }

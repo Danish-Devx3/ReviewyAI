@@ -1,5 +1,8 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
+
 const PLAN_TYPES = {
     free: [
         { name: "Up to 5 repositories", included: true },
@@ -18,5 +21,18 @@ const PLAN_TYPES = {
         { name: "Advanced analytics", included: true },
         { name: "Priority support", included: true },
     ],
+}
+
+export default function Subscription() {
+    const [checkoutLoading, setCheckoutLoading] = useState(false)
+    const [portalLoading, setPortalLoading] = useState(false)
+    const [syncLoading, setSyncLoading] = useState(false)
+    const searchParams = useSearchParams()
+    const success = searchParams.get("success")
+    return (
+        <div>
+            <h1>Subscription</h1>
+        </div>
+    )
 }
 
