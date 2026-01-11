@@ -19,3 +19,4 @@ const PLAN_TYPES = {
         { name: "Priority support", included: true },
     ],
 }
+
