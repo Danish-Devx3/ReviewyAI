@@ -88,7 +88,7 @@ export const auth = betterAuth({
               await updateUserTier(user.id, "FREE", "CANCELLED");
             }
           },
-          onOrderPaid: async () => {},
+          onOrderPaid: async () => { },
           onCustomerCreated: async (payload) => {
             const user = await prisma.user.findUnique({
               where: {
