@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
 import { subscriptionData } from "@/module/payments/action"
 import { useQuery } from "@tanstack/react-query"
-import { Check, RefreshCw } from "lucide-react"
+import { Check, RefreshCw, X } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 
@@ -151,6 +151,77 @@ export default function Subscription() {
                 </Card>
             )}
 
+            <div className="grid gap-6 md:grid-cols-2">
+                <Card className={!isPro ? "ring-2 ring-primary" : ""}>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Free</CardTitle>
+                                <CardDescription>Perfect for getting started</CardDescription>
+                            </div>
+                            {!isPro && <Badge className="ml-2">Current Plan</Badge>}
+                        </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold">
+                                $0
+                            </span>
+                            <span className="text-muted-foreground">/month</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            {PLAN_TYPES.free.map((type) => (
+                                <div key={type.name} className="flex items-center gap-2">
+                                    {type.included ? (
+                                        <Check className="h-4 w-4 text-primary shrink-0" />
+                                    ) : (
+                                        <X className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    )}
+                                    <span className="text-sm font-medium">{type.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <Button className="w-full" variant={"outline"} disabled>
+                            {!isPro ? "Current Plan" : "Upgrade"}
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Pro</CardTitle>
+                                <CardDescription>Perfect for teams</CardDescription>
+                            </div>
+                            {isPro && <Badge className="ml-2">Current Plan</Badge>}
+                        </div>
+                        <div className="mt-2">
+                            <span className="text-3xl font-bold">
+                                $9.99
+                            </span>
+                            <span className="text-muted-foreground">/month</span>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            {PLAN_TYPES.pro.map((type) => (
+                                <div key={type.name} className="flex items-center gap-2">
+                                    {type.included ? (
+                                        <Check className="h-4 w-4 text-primary shrink-0" />
+                                    ) : (
+                                        <X className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    )}
+                                    <span className="text-sm font-medium">{type.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <Button className="w-full" variant={"outline"}>
+                            {isPro ? "Current Plan" : "Upgrade"}
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
 
     )
