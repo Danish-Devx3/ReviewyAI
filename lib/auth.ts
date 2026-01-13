@@ -10,7 +10,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 // If your Prisma file is located elsewhere, you can change the path
 import prisma from "@/lib/prisma";
 import { polarClient } from "@/module/payments/config/polar";
-import { updateUserTier } from "@/module/payments/lib/subscription";
+import { updateUserTier, type SubscriptionTier } from "@/module/payments/lib/subscription";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -24,6 +24,7 @@ export const auth = betterAuth({
       scope: ["repo"],
     },
   },
+  trustedOrigins: [process.env.NEXT_PUBLIC_BASE_URL!, "http://localhost:3000"],
   plugins: [
     polar({
       client: polarClient,
@@ -33,14 +34,14 @@ export const auth = betterAuth({
           products: [
             {
               productId: "830b3250-1db2-46f7-bbe1-3240a0ee3515",
-              slug: "codepur",
+              slug: "pro",
             },
           ],
-          successUrl: process.env.POLAR_SUCCESS_URL!,
+          successUrl: process.env.POLAR_SUCCESS_URL || "/dashboard/subscription?success=true",
           authenticatedUsersOnly: true,
         }),
         portal({
-          returnUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+          returnUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000/dashboard",
         }),
         usage(),
         webhooks({
@@ -70,7 +71,7 @@ export const auth = betterAuth({
             if (user) {
               await updateUserTier(
                 user.id,
-                user.subscriptionTier as any,
+                user.subscriptionTier as SubscriptionTier,
                 "CANCELLED"
               );
             }

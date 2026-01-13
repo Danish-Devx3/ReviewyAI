@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { checkout, customer } from "@/lib/authClient"
 import { cn } from "@/lib/utils"
-import { subscriptionData } from "@/module/payments/action"
+import { subscriptionData, syncSubscriptionStatus } from "@/module/payments/action"
 import { useQuery } from "@tanstack/react-query"
-import { Check, RefreshCw, X } from "lucide-react"
+import { Check, ExternalLink, RefreshCw, X } from "lucide-react"
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const PLAN_TYPES = {
     free: [
@@ -32,6 +34,8 @@ const PLAN_TYPES = {
     ],
 }
 
+
+
 export default function Subscription() {
     const [checkoutLoading, setCheckoutLoading] = useState(false)
     const [portalLoading, setPortalLoading] = useState(false)
@@ -48,6 +52,61 @@ export default function Subscription() {
     const currentTier = data?.user?.subscriptionTier
     const isPro = currentTier === "PRO"
     const isActive = data?.user?.subscriptionStatus === "ACTIVE"
+
+    async function handleSync() {
+        try {
+            setSyncLoading(true)
+            const res = await syncSubscriptionStatus()
+            if (res?.success) {
+                toast.success("Subscription status synced successfully")
+                refetch()
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setSyncLoading(false)
+            setPortalLoading(false)
+        }
+    }
+
+    async function handleUpgrade() {
+        try {
+            setCheckoutLoading(true)
+            await checkout({
+                slug: "pro",
+            })
+        } catch (error) {
+            console.log(error)
+            setCheckoutLoading(false)
+        } finally {
+            setCheckoutLoading(false)
+            setPortalLoading(false)
+        }
+    }
+
+    async function handleManageSubscription() {
+        try {
+            setPortalLoading(true)
+            await customer.portal()
+        } catch (error) {
+            console.log(error)
+            setPortalLoading(false)
+        } finally {
+            setPortalLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        const sync = async () => {
+            try {
+                await handleSync()
+            } catch (error) {
+                console.error("Failed to sync subscription status", error)
+            }
+        }
+        sync()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     if (isLoading) {
         return <div className="flex items-center justify-center h-screen">
@@ -80,17 +139,13 @@ export default function Subscription() {
         </div>
     }
 
-    async function handleSync() {
-        setSyncLoading(true)
-        await refetch()
-        setSyncLoading(false)
-    }
+
 
     return (
         <div className="space-y-6" >
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Subscription Plans</h1>
+                    <h1 className="text-3xl font-bold tracking-tight flex items-center">Subscription Plans {isActive && <Badge variant="default" className="ml-12">Active</Badge>}</h1>
                     <p className="text-muted-foreground">Choose a plan to upgrade your account</p>
                 </div>
                 <Button
@@ -216,9 +271,12 @@ export default function Subscription() {
                                 </div>
                             ))}
                         </div>
-                        <Button className="w-full" variant={"outline"}>
-                            {isPro ? "Current Plan" : "Upgrade"}
-                        </Button>
+                        {isPro && <Button className="w-full" variant={"outline"} disabled={portalLoading} onClick={handleManageSubscription}>
+                            <ExternalLink /> Manage Subscription
+                        </Button>}
+                        {!isPro && <Button className="w-full" variant={"outline"} disabled={portalLoading || checkoutLoading} onClick={handleUpgrade}>
+                            {checkoutLoading ? <Spinner className="w-4 h-4 animate-spin mr-2" /> : "Upgrade"}
+                        </Button>}
                     </CardContent>
                 </Card>
             </div>
