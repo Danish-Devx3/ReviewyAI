@@ -1,16 +1,17 @@
 
 import { Button } from "@/components/ui/button";
-import { requireAuth } from "@/module/auth/utils/authUtills";
+import { requireNoAuth } from "@/module/auth/utils/authUtills";
 import Logout from "@/module/auth/components/logout";
 import { redirect } from "next/navigation";
+import HeroSection from "@/components/hero-section";
 
 export default async function Home() {
 
-  await requireAuth();
-  redirect('/dashboard');
+  
+  
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Logout><Button>Logout</Button></Logout>
-    </div>
+    <>
+      <HeroSection />
+    </>
   );
 }
