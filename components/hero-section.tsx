@@ -9,7 +9,9 @@ import { HeroHeader } from './header'
 import Features from './features-4'
 import IntegrationsSection from './integrations-6'
 
-const transitionVariants = {
+import { Variants } from 'motion/react'
+
+const transitionVariants: { container?: Variants; item?: Variants } = {
     item: {
         hidden: {
             opacity: 0,
