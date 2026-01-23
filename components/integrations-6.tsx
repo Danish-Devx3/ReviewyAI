@@ -18,7 +18,7 @@ const BitbucketIcon = () => (
 
 export default function IntegrationsSection() {
     return (
-        <section>
+        <section id="integrations">
             <div className="bg-muted dark:bg-background py-24 md:py-32">
                 <div className="mx-auto flex flex-wrap-reverse justify-between items-center max-w-5xl px-6">
                     <div className="mx-auto mb-6 max-w-lg space-y-6 text-center">
@@ -29,7 +29,7 @@ export default function IntegrationsSection() {
                             variant="outline"
                             size="sm"
                             asChild>
-                            <Link href="#">Get Started</Link>
+                            <Link href="/login">Get Started</Link>
                         </Button>
                     </div>
                     <div className="mx-auto max-w-md px-6">

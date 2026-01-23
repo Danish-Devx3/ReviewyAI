@@ -69,7 +69,7 @@ export default function AboutPage() {
                                     </p>
                                     <div className="mt-10 flex items-center gap-x-6">
                                         <Button asChild>
-                                            <Link href="#">
+                                            <Link href="/login">
                                                 Get Started <ArrowRight className="ml-2 size-4" />
                                             </Link>
                                         </Button>
