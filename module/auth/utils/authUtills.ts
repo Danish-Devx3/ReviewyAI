@@ -23,6 +23,6 @@ export const requireNoAuth = async () => {
     })
 
     if (session?.user) {
-        redirect('/')
+        redirect('/dashboard')
     }
 }
