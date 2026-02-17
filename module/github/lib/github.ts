@@ -230,6 +230,6 @@ export const postReviewComment = async (token: string, owner: string, repo: stri
     owner,
     repo,
     issue_number: pull_number,
-    body: `## AI Code Review \n\n${review}\n\n---\n*Powered by Codepur*`,
+    body: `## AI Code Review \n\n${review}\n\n---\n*Powered by ReviewyAI*`,
   });
 };
